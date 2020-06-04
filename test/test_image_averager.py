@@ -39,9 +39,12 @@ def test_build_average_image(test_image_dir, tmpdir, averaged_image):
     np.testing.assert_array_equal(expected, np.array(result))
 
 
-def test_cli(test_image_dir, tmpdir, caplog):
+def test_cli(test_image_dir, tmpdir, capsys):
     outpath = pathlib.Path(tmpdir / "result.png")
-    args = f'-s {test_image_dir} -o {outpath}'
+    args = f'-s {test_image_dir} -o {outpath} -l{"DEBUG"}'
     image_averager.main(args.split())
 
+    out, err = capsys.readouterr()
+    assert not out
+    assert err == 'INFO averaging 3 images.\n'
     assert outpath.exists()

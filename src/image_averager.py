@@ -6,8 +6,8 @@ from PIL import Image
 import numpy as np
 from loguru import logger
 
-# remove default logger
-logger.remove()
+# don't set up logging on import...
+logger.disable(__name__)
 
 VALID_LEVELS = ('TRACE', 'DEBUG', 'INFO', 'SUCCESS', 'WARNING', 'ERROR', 'CRITICAL')
 
@@ -65,7 +65,9 @@ def build_average_image(src_directory: pathlib.Path, glob='*.png') -> Image:
 
 
 def configure_logging(level: str):
-    logger.add(sys.stderr, format="{time} {level} {message}", filter=__name__, level=level)
+    logger.remove()
+    logger.enable(__name__)
+    logger.add(sys.stderr, format="{level} {message}", filter=__name__, level=level)
 
 
 def main(argv=None):
