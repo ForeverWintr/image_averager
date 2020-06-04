@@ -4,7 +4,7 @@ import pathlib
 
 def existing_directory(path: str):
     fullpath = pathlib.Path(path).absolute()
-    if not fullpath.exists():
+    if not fullpath.exists() or not fullpath.is_dir():
         raise argparse.ArgumentTypeError(fullpath)
     return fullpath
 
