@@ -9,7 +9,7 @@ from src import image_averager
 
 @pytest.fixture
 def test_image_dir(tmpdir):
-    test_images = pathlib.Path(__file__).parent / 'data'
+    test_images = pathlib.Path(__file__).parent / 'data' / 'test_images'
     target = pathlib.Path(tmpdir) / 'images'
 
     shutil.copytree(test_images, target)
