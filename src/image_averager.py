@@ -1,8 +1,15 @@
 import argparse
 import pathlib
+import sys
 
 from PIL import Image
 import numpy as np
+from loguru import logger
+
+# remove default logger
+logger.remove()
+
+VALID_LEVELS = ('TRACE', 'DEBUG', 'INFO', 'SUCCESS', 'WARNING', 'ERROR', 'CRITICAL')
 
 
 def existing_directory(path: str):
@@ -10,6 +17,10 @@ def existing_directory(path: str):
     if not fullpath.exists() or not fullpath.is_dir():
         raise argparse.ArgumentTypeError(fullpath)
     return fullpath
+
+
+def abspath(path: str):
+    return pathlib.Path(path).absolute()
 
 
 def get_arg_parser():
@@ -22,6 +33,17 @@ def get_arg_parser():
         default='.',
         required=False,
     )
+    p.add_argument(
+        '-o',
+        '--output_file',
+        help='Path to a file to store the results',
+        type=abspath,
+        default='averaged.png',
+    )
+    p.add_argument(
+        '-l', '--log_level', help='Log verbosity', choices=VALID_LEVELS, default='CRITICAL'
+    )
+
     return p
 
 
@@ -34,17 +56,28 @@ def iter_image_arrays(src_directory, glob):
 
 def build_average_image(src_directory: pathlib.Path, glob='*.png') -> Image:
     # Using a python tuple here, because I'm not sure if there's a benefit to fitting these all in
-    # a numpy array
+    # a numpy array.
     all_arrays = tuple(iter_image_arrays(src_directory, glob))
+    logger.info(f'averaging {len(all_arrays)} images.')
     average = np.mean(all_arrays, axis=0)
     result = Image.fromarray(average.astype(np.uint8))
     return result
 
 
+def configure_logging(level: str):
+    logger.add(sys.stderr, format="{time} {level} {message}", filter=__name__, level=level)
+
+
 def main(argv=None):
     p = get_arg_parser()
-    p.parse_args(argv)
+    args = p.parse_args(argv)
+
+    configure_logging(args.log_level)
+
+    result = build_average_image(args.src_directory)
+    result.save(args.output_file)
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
