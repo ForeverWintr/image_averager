@@ -3,8 +3,10 @@ import pathlib
 
 
 def existing_directory(path: str):
-    fullpath = pathlib.Path(path).absolute
-    asdf
+    fullpath = pathlib.Path(path).absolute()
+    if not fullpath.exists():
+        raise argparse.ArgumentTypeError(fullpath)
+    return fullpath
 
 
 def get_arg_parser():
